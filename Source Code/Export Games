@@ -1,0 +1,88 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# # Downloading The Games of a Particular User
+
+# ## Importing Libraries 
+
+# In[1]:
+
+
+import berserk
+import re
+import csv
+
+
+# ## Authenticating Using an API token
+
+# In[2]:
+
+
+token="lip_NJ8EoGGdqP4Jis7oGwq6"
+
+session = berserk.TokenSession(token)
+client = berserk.Client(session)
+
+
+# ## Getting User Name and Games of a particular User 
+
+# In[3]:
+
+
+while(True):
+    try:
+        userName=input("ENTER THE USERNAME OF THE OPPONENT: ")
+        colour=input("ENTER THE COLOR OF OPPONENT: ")
+        varients=["bullet","blitz","rapid","classical"]
+        games=[]
+        for varient in varients:
+            games+=list(client.games.export_by_player(username=userName,as_pgn=True,rated=True,perf_type=varient,color=colour.lower(),moves=True,finished=True))
+        break;
+    except:
+        print("INVALID USERNAME OR COLOR")
+
+
+# ## Games Extraction from PGN(Portable Game Notation) 
+
+# In[4]:
+
+
+moves=[]
+date=[]
+for game in games:
+    details=game.split("\n\n")
+    moves.append((details[1]))
+    date+=(re.findall(r'\[UTCDate \"(.*?)\"\]',game))
+moves
+
+
+# ## Copying the game into a File 
+
+# In[7]:
+
+
+header=["Date","Game"]
+data=[date,moves]
+with open(r"D:\Improving Opening Book Efficiency through Modelling of Chess Opponents\Games.csv", 'w', encoding='UTF8') as f:
+    writer = csv.writer(f)
+    
+    writer.writerow(header)
+    for d1,d2 in zip(date,moves):
+        writer.writerow([d1,d2])
+
+
+# ## Storing User Data 
+
+# In[9]:
+
+
+f=open(r"D:\Improving Opening Book Efficiency through Modelling of Chess Opponents\UserData.txt",'w')
+f.write(f"{userName} \n")
+f.write(f"{colour} \n")
+f.close()
+
+
+# In[ ]:
+
+
+
